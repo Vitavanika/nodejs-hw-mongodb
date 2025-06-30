@@ -2,10 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import pino from 'pino-http';
 import dotenv from 'dotenv';
-import {
-  getAllContactsController,
-  getContactByIdController,
-} from './controllers/contacts.js';
+import contactsRouter from './routers/contacts.js';
+import { notFoundHandler } from './middlewares/notFoundHandler.js';
+import { errorHandler } from './middlewares/errorHandler.js';
 
 dotenv.config();
 
@@ -20,23 +19,11 @@ export const setupServer = () => {
       },
     }),
   );
+  app.use(express.json());
+  app.use('/contacts', contactsRouter);
 
-  app.get('/contacts', getAllContactsController);
-  app.get('/contacts/:contactId', getContactByIdController);
-
-  app.use((req, res) => {
-    res.status(404).json({
-      message: 'Not found',
-    });
-  });
-
-  app.use((err, req, res, _next) => {
-    console.error(err);
-    res.status(500).json({
-      message: 'Something went wrong',
-      error: err.message,
-    });
-  });
+  app.use(notFoundHandler);
+  app.use(errorHandler);
 
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
