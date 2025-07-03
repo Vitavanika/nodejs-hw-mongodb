@@ -8,11 +8,17 @@ import {
 import createHttpError from 'http-errors';
 
 export const getAllContactsController = async (req, res) => {
-  const contacts = await getAllContactsService();
+  const page = parseInt(req.query.page || '1', 10);
+  const perPage = parseInt(req.query.perPage || '10', 10);
+  const sortBy = req.query.sortBy || 'name';
+  const sortOrder = req.query.sortOrder || 'asc';
+  const contactType = req.query.type;
+  const isFavourite = req.query.isFavourite;
+  const paginationResult = await getAllContactsService({ page, perPage, sortBy, sortOrder, contactType, isFavourite });
   res.json({
     status: 200,
     message: 'Successfully found contacts!',
-    data: contacts,
+    data: paginationResult,
   });
 };
 
@@ -51,9 +57,6 @@ export const deleteContactController = async (req, res) => {
 export const updateContactController = async (req, res) => {
   const { contactId } = req.params;
   const payload = req.body;
-  if (Object.keys(payload).length === 0) {
-    throw createHttpError(400, 'Missing fields to update');
-  }
   const contact = await updateContactService(contactId, payload);
   if (!contact) {
     throw createHttpError(404, 'Contact not found');
