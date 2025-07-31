@@ -3,15 +3,18 @@ import { Session } from '../models/session.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import createHttpError from 'http-errors';
+import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
+
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
-const ONE_DAY = 24 * 60 * 60 * 1000;
+const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
 
 const generateSessionTokens = () => {
   const accessToken = crypto.randomBytes(30).toString('base64');
   const refreshToken = crypto.randomBytes(30).toString('base64');
 
   const accessTokenValidUntil = new Date(Date.now() + FIFTEEN_MINUTES);
-  const refreshTokenValidUntil = new Date(Date.now() + ONE_DAY);
+  const refreshTokenValidUntil = new Date(Date.now() + THIRTY_DAYS);
 
   return {
     accessToken,
@@ -95,4 +98,45 @@ export const logoutUser = async (refreshToken) => {
     await Session.deleteOne({ _id: session._id });
   }
   return { message: 'User logged out successfully' };
+};
+
+export const sendResetEmail = async (email) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw createHttpError(404, 'User not found!');
+  }
+
+  const passwordResetToken = jwt.sign({ email }, process.env.JWT_SECRET, {
+    expiresIn: '5m',
+  });
+
+  const resetPasswordLink = `${process.env.APP_DOMAIN}/reset-password?token=${passwordResetToken}`;
+
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASSWORD,
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.SMTP_FROM,
+    to: email,
+    subject: 'Password Reset Request',
+    text: `To reset your password, please click the following link: ${resetPasswordLink}`,
+    html: `<p>To reset your password, please click the following link: <a href="${resetPasswordLink}">${resetPasswordLink}</a></p>`,
+  };
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log('Email sent successfully!');
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw createHttpError(
+      500,
+      'Failed to send the email, please try again later.',
+    );
+  }
 };
