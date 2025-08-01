@@ -127,8 +127,10 @@ export const sendResetEmail = async (email) => {
     to: email,
     subject: 'Password Reset Request',
     text: `To reset your password, please click the following link: ${resetPasswordLink}`,
-    html: `<p>To reset your password, please click the following link: <a href="${resetPasswordLink}">${resetPasswordLink}</a></p>`,
+    html: `<p>To reset your password, please click the following link: <a href="${resetPasswordLink}">${resetPasswordLink}</a></p>
+           <p>The link is valid for 5 minutes. If you did not request a password reset, please ignore this email.</p>`,
   };
+
   try {
     await transporter.sendMail(mailOptions);
     console.log('Email sent successfully!');
@@ -139,4 +141,25 @@ export const sendResetEmail = async (email) => {
       'Failed to send the email, please try again later.',
     );
   }
+};
+
+export const resetPassword = async (token, password) => {
+  let decodedPayload;
+  try {
+    decodedPayload = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      throw createHttpError(401, 'Token is expired or invalid.');
+    }
+    throw createHttpError(401, 'Token is expired or invalid.');
+  }
+
+  const user = await User.findOne({ email: decodedPayload.email });
+  if (!user) {
+    throw createHttpError(404, 'User not found!');
+  }
+
+  const newHashedPassword = await bcrypt.hash(password, 10);
+  await User.findByIdAndUpdate(user._id, { password: newHashedPassword });
+  await Session.deleteMany({ userId: user._id });
 };

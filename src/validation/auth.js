@@ -38,3 +38,13 @@ export const sendResetEmailSchema = Joi.object({
     'any.required': 'Email is required',
   }),
 });
+
+export const resetPasswordSchema = Joi.object({
+  token: Joi.string().required().messages({
+    'any.required': 'Token is required.',
+  }),
+  password: Joi.string().min(6).required().messages({
+    'string.min': 'Password should have a minimum length of {#limit}',
+    'any.required': 'Password is required.',
+  }),
+});

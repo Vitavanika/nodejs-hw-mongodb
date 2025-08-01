@@ -1,5 +1,6 @@
 import { Contact } from '../models/contact.js';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
+import { savePhotoToCloudinary } from './cloudinary.js';
 
 export const getAllContacts = async ({
   page,
@@ -33,9 +34,19 @@ export const getAllContacts = async ({
 
 export const getContactById = async (contactId, userId) =>
   Contact.findOne({ _id: contactId, userId });
-export const createContact = async (payload, userId) =>
-  Contact.create({ ...payload, userId });
+
+export const createContact = async (payload, userId, file) => {
+  const photoUrl = await savePhotoToCloudinary(file);
+  return Contact.create({ ...payload, userId, photo: photoUrl });
+};
+
 export const deleteContact = async (contactId, userId) =>
   Contact.findOneAndDelete({ _id: contactId, userId });
-export const updateContact = async (contactId, payload, userId) =>
-  Contact.findOneAndUpdate({ _id: contactId, userId }, payload, { new: true });
+
+export const updateContact = async (contactId, payload, userId, file) => {
+  const photoUrl = await savePhotoToCloudinary(file);
+  const updatePayload = photoUrl ? { ...payload, photo: photoUrl } : payload;
+  return Contact.findOneAndUpdate({ _id: contactId, userId }, updatePayload, {
+    new: true,
+  });
+};

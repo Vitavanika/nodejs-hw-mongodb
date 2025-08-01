@@ -40,7 +40,8 @@ export const getContactByIdController = async (req, res) => {
 export const createContactController = async (req, res) => {
   const payload = req.body;
   const userId = req.user._id;
-  const contact = await createContactService(payload, userId);
+  const file = req.file;
+  const contact = await createContactService(payload, userId, file);
   res.status(201).json({
     status: 201,
     message: 'Successfully created a contact!',
@@ -62,9 +63,10 @@ export const updateContactController = async (req, res) => {
   const { contactId } = req.params;
   const payload = req.body;
   const userId = req.user._id;
-  const contact = await updateContactService(contactId, payload, userId);
+  const file = req.file;
+  const contact = await updateContactService(contactId, payload, userId, file);
   if (!contact) {
-    throw createHttpError(404, 'Contact not found');
+    throw createHttpError(404, 'Contact not found!');
   }
   res.status(200).json({
     status: 200,
