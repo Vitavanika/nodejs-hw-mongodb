@@ -2,7 +2,12 @@ import { User } from '../models/user.js';
 import { Session } from '../models/session.js';
 import bcrypt from 'bcrypt';
 import createHttpError from 'http-errors';
-import { createAccessToken, createRefreshToken, verifyToken } from './jwt.js';
+import {
+  createAccessToken,
+  createRefreshToken,
+  createResetToken,
+  verifyToken,
+} from './jwt.js';
 import { sendEmail } from './email.js';
 
 export const registerUser = async (payload) => {
@@ -46,11 +51,11 @@ export const refreshSession = async (refreshToken) => {
   if (!session || new Date() > session.refreshTokenValidUntil) {
     throw createHttpError(401, 'Session not found or expired!');
   }
-  
+
   await Session.deleteOne({ _id: session._id });
   const newAccessToken = createAccessToken(session.userId);
   const newRefreshToken = createRefreshToken(session.userId);
-  
+
   const newSession = await Session.create({
     userId: session.userId,
     accessToken: newAccessToken,
@@ -76,7 +81,7 @@ export const sendResetEmail = async (email) => {
   if (!user) {
     throw createHttpError(404, 'User not found!');
   }
-  const passwordResetToken = createAccessToken({ email }, '5m');
+  const passwordResetToken = createResetToken(email);
   const resetPasswordLink = `${process.env.APP_DOMAIN}/reset-password?token=${passwordResetToken}`;
   const htmlContent = `<p>To reset your password, please click the following link: <a href="${resetPasswordLink}">${resetPasswordLink}</a></p>
                        <p>The link is valid for 5 minutes. If you did not request a password reset, please ignore this email.</p>`;

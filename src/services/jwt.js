@@ -16,16 +16,21 @@ export const createAccessToken = (user, expiresIn = ACCESS_TOKEN_VALIDITY) => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn });
 };
 
-export const createRefreshToken = (
-  user,
-  expiresIn = REFRESH_TOKEN_VALIDITY,
-) => {
+export const createRefreshToken = (user, expiresIn = REFRESH_TOKEN_VALIDITY) => {
   if (!user || !user._id) {
     throw createHttpError(401, 'User data is missing for token creation.');
   }
 
   const payload = { id: user._id };
   return jwt.sign(payload, JWT_SECRET, { expiresIn });
+};
+
+export const createResetToken = (email) => {
+  if (!email) {
+    throw createHttpError(401, 'Email is missing for token creation');
+  }
+  const payload = { email };
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '5m' });
 };
 
 export const verifyToken = (token) => {
