@@ -9,6 +9,10 @@ import {
   verifyToken,
 } from './jwt.js';
 import { sendEmail } from './email.js';
+import {
+  getFullNameFromGoogleTokenPayload,
+  validateCode,
+} from '../utils/googleOAuth2.js';
 
 export const registerUser = async (payload) => {
   const existingUser = await User.findOne({ email: payload.email });
@@ -65,6 +69,7 @@ export const refreshSession = async (refreshToken) => {
   return {
     accessToken: newSession.accessToken,
     refreshToken: newSession.refreshToken,
+    refreshTokenValidUntil: newSession.refreshTokenValidUntil,
   };
 };
 
@@ -99,4 +104,38 @@ export const resetPassword = async (token, password) => {
   const newHashedPassword = await bcrypt.hash(password, 10);
   await User.findByIdAndUpdate(user._id, { password: newHashedPassword });
   await Session.deleteMany({ userId: user._id });
+};
+
+export const loginOrSignupWithGoogle = async (code) => {
+  const loginTicket = await validateCode(code);
+  const payload = loginTicket.getPayload();
+  if (!payload)
+    throw createHttpError(401, 'Failed to authenticate with Google.');
+
+  let user = await User.findOne({ email: payload.email });
+  if (!user) {
+    const password = await bcrypt.hash(payload.sub, 10);
+    user = await User.create({
+      email: payload.email,
+      name: getFullNameFromGoogleTokenPayload(payload),
+      password,
+      role: 'parent',
+    });
+  }
+
+  await Session.deleteOne({ userId: user._id });
+  const accessToken = createAccessToken(user);
+  const refreshToken = createRefreshToken(user);
+
+  const newSession = await Session.create({
+    userId: user._id,
+    accessToken,
+    refreshToken,
+  });
+
+  return {
+    accessToken: newSession.accessToken,
+    refreshToken: newSession.refreshToken,
+    refreshTokenValidUntil: newSession.refreshTokenValidUntil,
+  };
 };

@@ -1,0 +1,49 @@
+summary: Update an existing contact
+description: Updates a contact by its unique ID.
+tags:
+  - Contacts
+operationId: updateContact
+security:
+  - bearerAuth: []
+parameters:
+  - name: contactId
+    in: path
+    required: true
+    description: The unique ID of the contact.
+    schema:
+      type: string
+      pattern: '^[0-9a-fA-F]{24}$'
+requestBody:
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        properties:
+          name:
+            type: string
+          phoneNumber:
+            type: string
+          contactType:
+            type: string
+            enum: ['personal', 'work', 'family']
+          isFavourite:
+            type: boolean
+          photo:
+            type: string
+            format: binary
+responses:
+  '200':
+    description: The contact was successfully updated.
+    content:
+      application/json:
+        schema:
+          $ref: ../../../components/schemas/Contact.yaml
+  '400':
+    description: Bad request. Validation error.
+    $ref: ../../../components/responses/400.yaml
+  '401':
+    $ref: ../../../components/responses/401.yaml
+  '404':
+    description: Contact not found.
+    $ref: ../../../components/responses/404.yaml
+  

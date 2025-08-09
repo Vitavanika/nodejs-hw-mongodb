@@ -1,0 +1,14 @@
+summary: User logout
+description: |
+  Logs out the user by invalidating their refresh token.
+  This will prevent the user from obtaining new access tokens.
+tags:
+  - Auth
+operationId: logoutUser
+security:
+  - bearerAuth: []
+responses:
+  '204':
+    description: The user was successfully logged out.
+  '401':
+    $ref: '../../components/responses/401.yaml'

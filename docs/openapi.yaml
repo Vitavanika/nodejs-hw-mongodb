@@ -1,0 +1,68 @@
+openapi: 3.1.0
+info:
+  version: 1.0.0
+  title: Contacts API
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  description: This is a documentation of contacts app
+
+tags:
+  - name: Auth
+    description: User authentication endpoints
+  - name: Contacts
+    description: Endpoints for managing contacts
+
+servers:
+  - url: http://127.0.0.1:3000
+  - url: https://contacts-app-vxkz.onrender.com
+
+paths:
+  /contacts/{contactId}:
+    get:
+      $ref: '../swagger/paths/contacts/{contactId}/get.yaml'
+    patch:
+      $ref: '../swagger/paths/contacts/{contactId}/patch.yaml'
+    delete:
+      $ref: '../swagger/paths/contacts/{contactId}/delete.yaml'
+  /contacts:
+    get:
+      $ref: '../swagger/paths/contacts/get.yaml'
+    post:
+      $ref: '../swagger/paths/contacts/post.yaml'
+  /auth/register:
+    post:
+      $ref: '../swagger/paths/auth/register.yaml'
+  /auth/login:
+    post:
+      $ref: '../swagger/paths/auth/login.yaml'
+  /auth/logout:
+    post:
+      $ref: '../swagger/paths/auth/logout.yaml'
+  /auth/get-oauth-url:
+    get: 
+      $ref: '../swagger/paths/auth/get-oauth-url.yaml'
+  /auth/confirm-google-auth:
+    get: 
+      $ref: '../swagger/paths/auth/confirm-google-auth.yaml'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+    googleAuth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.google.com/o/oauth2/v2/auth
+          tokenUrl: https://oauth2.googleapis.com/token
+          scopes:
+            openid: Grants access to the user's ID token.
+            profile: Grants access to the user's basic profile info.
+            email: Grants access to the user's email address.
+  schemas:
+    Contact:
+      $ref: ../swagger/components/schemas/Contact.yaml
+    User:
+      $ref: ../swagger/components/schemas/User.yaml

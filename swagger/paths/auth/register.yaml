@@ -1,0 +1,40 @@
+summary: Register a new user
+description: |
+  Registers a new user with the provided email and password.
+  If the email is already in use, an error will be returned.
+tags:
+  - Auth
+operationId: registerUser
+security:
+  - bearerAuth: []
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '../../components/schemas/User.yaml'
+responses:
+  '201':
+    description: The user was successfully registered.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: User registered successfully
+  '409':
+    description: Conflict - The email is already in use
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: Email already in use            
+  '400':
+    $ref: ../../components/responses/400.yaml
+  '500':
+    $ref: ../../components/responses/500.yaml

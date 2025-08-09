@@ -1,0 +1,38 @@
+summary: Login a user with Google
+description: |
+  Authenticates a user using Google OAuth.
+  If the authentication is successful, a JWT token will be returned.
+tags:
+  - Auth
+operationId: confirmGoogleAuth
+security:
+  - googleAuth: []
+parameters:
+  - name: code
+    in: query
+    required: true
+    description: The authorization code received from Google after user consent.
+    schema:
+      type: string
+responses:
+  '200':
+    description: The user was successfully authenticated with Google.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+            message:
+              type: string
+            data:
+              type: object
+              properties:
+                accessToken:
+                  type: string
+                  description: The access token for API authentication.
+  '400':
+    $ref: '../../components/responses/400.yaml'
+  '500':
+    $ref: '../../components/responses/500.yaml'

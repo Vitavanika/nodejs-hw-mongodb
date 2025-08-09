@@ -1,0 +1,33 @@
+summary: Get google OAuth URL
+description: |
+  Returns the URL for Google OAuth authentication.
+  This URL can be used to redirect users to Google's OAuth consent screen.
+tags:
+  - Auth
+operationId: getGoogleOAuthUrl
+security:
+  - googleAuth: []
+responses:
+  '200':
+    description: The Google OAuth URL was successfully retrieved.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            url:
+              type: string
+              format: uri
+              description: The Google OAuth URL for authentication.
+  '400':
+    $ref: '../../components/responses/400.yaml'
+  '500':
+    description: Internal server error.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: An error occurred while retrieving the OAuth URL.
