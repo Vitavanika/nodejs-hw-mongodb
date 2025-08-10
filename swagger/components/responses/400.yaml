@@ -13,17 +13,3 @@ content:
         message:
           type: string
           example: Bad Request
-        data:
-          type: object
-          properties:
-            errors:
-              type: array
-              items:
-                type: object
-                properties:
-                  field:
-                    type: string
-                    example: name
-                  message:
-                    type: string
-                    example: Name is required.

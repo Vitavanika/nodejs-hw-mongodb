@@ -1,47 +1,11 @@
-summary: Get a list of contacts
-description: |
-  Returns a paginated list of contacts for the authenticated user, with optional filters.
+summary: Create a new contact
+description: Creates a new contact with the provided data.
 tags:
   - Contacts
 operationId: createContact
 security:
   - bearerAuth: []
-parameters:
-  - name: name
-    in: query
-    description: Filter contacts by name.
-    schema:
-      type: string
-  - name: phoneNumber
-    in: query
-    description: Filter contacts by phone number.
-    schema:
-      type: string
-  - name: contactType
-    in: query
-    description: Filter contacts by type (e.g., personal, work).
-    schema:
-      type: string
-      enum: ['personal', 'work', 'family']
-  - name: isFavourite
-    in: query
-    description: Filter contacts by favourite status.
-    schema:
-      type: boolean
-  - name: page
-    in: query
-    description: Page number for pagination.
-    schema:
-      type: integer
-      minimum: 1
-      default: 1
-  - name: limit
-    in: query
-    description: Number of items per page.
-    schema:
-      type: integer
-      minimum: 1
-      default: 10
+
 requestBody:
   content:
     multipart/form-data:
@@ -55,40 +19,47 @@ requestBody:
           name:
             type: string
             description: The name of the contact.
+            example: John Doe
           phoneNumber:
             type: string
             description: The phone number of the contact.
+            example: +1234567890
+          email:
+            type: string
+            description: The email of the contact.
+            example: email@example.com
           contactType:
             type: string
             enum: ['personal', 'work', 'family']
             description: The type of the contact.
           isFavourite:
             type: boolean
-            description: Whether the contact is marked as favourite
+            description: Whether the contact is a favourite or not.
           photo:
             type: string
             format: binary
-            description: The profile picture of the contact.
+            description: The photo of the contact.
 responses:
   '200':
-    description: A list of contacts was successfully retrieved.
+    description: Contact created successfully.
     content:
       application/json:
         schema:
           type: object
+          required:
+            - status
+            - message
+            - data
           properties:
-            contacts:
-              type: array
-              items:
-                $ref: '../../components/schemas/Contact.yaml'
-            totalPages:
+            status:
               type: integer
-              description: Total number of pages available.
-            currentPage:
-              type: integer
-              description: Current page number.
-            totalItems:
-              type: integer
-              description: Total number of contacts available.
+              example: 201
+              description: HTTP status code
+            message:
+              type: string
+              example: 'Contact created successfully!'
+            data:
+              type: object
+              $ref: '../../components/schemas/Contact.yaml'
   '401':
     $ref: ../../components/responses/401.yaml

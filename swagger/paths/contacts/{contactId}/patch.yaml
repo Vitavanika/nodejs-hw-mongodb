@@ -21,23 +21,51 @@ requestBody:
         properties:
           name:
             type: string
+            description: The name of the contact.
+            example: John Doe
           phoneNumber:
             type: string
+            description: The phone number of the contact.
+            example: +1234567890
+          email:
+            type: string
+            description: The email of the contact.
+            example: email@example.com
           contactType:
             type: string
             enum: ['personal', 'work', 'family']
+            description: The type of the contact.
+            example: personal
           isFavourite:
             type: boolean
+            description: Whether the contact is a favourite or not.
+            example: true
           photo:
             type: string
             format: binary
+            description: The photo of the contact.
+            example: contact.jpg
 responses:
   '200':
     description: The contact was successfully updated.
     content:
       application/json:
         schema:
-          $ref: ../../../components/schemas/Contact.yaml
+          type: object
+          required:
+            - status
+            - message
+            - data
+          properties:
+            status:
+              type: integer
+              example: 201
+              description: HTTP status code
+            message:
+              type: string
+              example: 'Contact updated successfully!'
+            data:
+              $ref: '../../../components/schemas/Contact.yaml'
   '400':
     description: Bad request. Validation error.
     $ref: ../../../components/responses/400.yaml

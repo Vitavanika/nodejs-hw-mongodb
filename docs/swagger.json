@@ -31,7 +31,7 @@
     "/contacts/{contactId}": {
       "get": {
         "summary": "Get a contact by ID",
-        "description": "Returns a single contact by its unique ID.\n",
+        "description": "Returns a single contact by its unique ID.",
         "tags": [
           "Contacts"
         ],
@@ -94,8 +94,7 @@
                   "type": "object",
                   "required": [
                     "status",
-                    "message",
-                    "data"
+                    "message"
                   ],
                   "properties": {
                     "status": {
@@ -104,10 +103,7 @@
                     },
                     "message": {
                       "type": "string",
-                      "example": "Contact not found"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/Contact"
+                      "example": "The contact with the specified ID does not exist."
                     }
                   }
                 }
@@ -150,10 +146,19 @@
                 "type": "object",
                 "properties": {
                   "name": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The name of the contact.",
+                    "example": "John Doe"
                   },
                   "phoneNumber": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The phone number of the contact.",
+                    "example": 1234567890
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "The email of the contact.",
+                    "example": "email@example.com"
                   },
                   "contactType": {
                     "type": "string",
@@ -161,14 +166,20 @@
                       "personal",
                       "work",
                       "family"
-                    ]
+                    ],
+                    "description": "The type of the contact.",
+                    "example": "personal"
                   },
                   "isFavourite": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Whether the contact is a favourite or not.",
+                    "example": true
                   },
                   "photo": {
                     "type": "string",
-                    "format": "binary"
+                    "format": "binary",
+                    "description": "The photo of the contact.",
+                    "example": "contact.jpg"
                   }
                 }
               }
@@ -181,7 +192,26 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Contact"
+                  "type": "object",
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 201,
+                      "description": "HTTP status code"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Contact updated successfully!"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Contact"
+                    }
+                  }
                 }
               }
             }
@@ -227,9 +257,6 @@
           "204": {
             "description": "The contact was successfully deleted."
           },
-          "401": {
-            "$ref": "#/components/responses/401"
-          },
           "404": {
             "description": "Contact not found",
             "$ref": "#/components/responses/404"
@@ -243,7 +270,7 @@
     "/contacts": {
       "get": {
         "summary": "Get a list of contacts",
-        "description": "eturns a paginated list of contacts for the authenticated user, with optional filters.",
+        "description": "Returns a paginated list of contacts for the authenticated user, with optional filters.",
         "tags": [
           "Contacts"
         ],
@@ -265,7 +292,7 @@
             }
           },
           {
-            "name": "limit",
+            "name": "perPage",
             "in": "query",
             "description": "Number of items per page.",
             "schema": {
@@ -275,11 +302,45 @@
             }
           },
           {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Sort field name.",
+            "schema": {
+              "type": "string",
+              "example": "name"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "Sort direction (asc or desc).",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
             "name": "contactType",
             "in": "query",
-            "description": "Filter contacts by type (e.g., personal, work).",
+            "description": "Filter by contact type (work, personal, home)",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "work",
+                "personal",
+                "home"
+              ]
+            }
+          },
+          {
+            "name": "isFavourite",
+            "in": "query",
+            "description": "Filter by favourite status.",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -290,20 +351,55 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ],
                   "properties": {
-                    "contacts": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Contact"
+                    "status": {
+                      "type": "integer",
+                      "example": 200,
+                      "description": "HTTP status code"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Successfully found contacts!"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "contacts": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Contact"
+                          }
+                        },
+                        "page": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "perPage": {
+                          "type": "integer",
+                          "example": 10
+                        },
+                        "totalItems": {
+                          "type": "integer",
+                          "example": 20
+                        },
+                        "totalPages": {
+                          "type": "integer",
+                          "example": 10
+                        },
+                        "hasNextPage": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "hasPreviousPage": {
+                          "type": "boolean",
+                          "example": false
+                        }
                       }
-                    },
-                    "totalPages": {
-                      "type": "integer",
-                      "description": "Total number of pages available."
-                    },
-                    "currentPage": {
-                      "type": "integer",
-                      "description": "Current page number."
                     }
                   }
                 }
@@ -319,8 +415,8 @@
         }
       },
       "post": {
-        "summary": "Get a list of contacts",
-        "description": "Returns a paginated list of contacts for the authenticated user, with optional filters.\n",
+        "summary": "Create a new contact",
+        "description": "Creates a new contact with the provided data.",
         "tags": [
           "Contacts"
         ],
@@ -328,65 +424,6 @@
         "security": [
           {
             "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "name",
-            "in": "query",
-            "description": "Filter contacts by name.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "phoneNumber",
-            "in": "query",
-            "description": "Filter contacts by phone number.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "contactType",
-            "in": "query",
-            "description": "Filter contacts by type (e.g., personal, work).",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "personal",
-                "work",
-                "family"
-              ]
-            }
-          },
-          {
-            "name": "isFavourite",
-            "in": "query",
-            "description": "Filter contacts by favourite status.",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "description": "Page number for pagination.",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 1
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Number of items per page.",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 10
-            }
           }
         ],
         "requestBody": {
@@ -402,11 +439,18 @@
                 "properties": {
                   "name": {
                     "type": "string",
-                    "description": "The name of the contact."
+                    "description": "The name of the contact.",
+                    "example": "John Doe"
                   },
                   "phoneNumber": {
                     "type": "string",
-                    "description": "The phone number of the contact."
+                    "description": "The phone number of the contact.",
+                    "example": 1234567890
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "The email of the contact.",
+                    "example": "email@example.com"
                   },
                   "contactType": {
                     "type": "string",
@@ -419,12 +463,12 @@
                   },
                   "isFavourite": {
                     "type": "boolean",
-                    "description": "Whether the contact is marked as favourite"
+                    "description": "Whether the contact is a favourite or not."
                   },
                   "photo": {
                     "type": "string",
                     "format": "binary",
-                    "description": "The profile picture of the contact."
+                    "description": "The photo of the contact."
                   }
                 }
               }
@@ -433,29 +477,29 @@
         },
         "responses": {
           "200": {
-            "description": "A list of contacts was successfully retrieved.",
+            "description": "Contact created successfully.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "status",
+                    "message",
+                    "data"
+                  ],
                   "properties": {
-                    "contacts": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Contact"
-                      }
-                    },
-                    "totalPages": {
+                    "status": {
                       "type": "integer",
-                      "description": "Total number of pages available."
+                      "example": 201,
+                      "description": "HTTP status code"
                     },
-                    "currentPage": {
-                      "type": "integer",
-                      "description": "Current page number."
+                    "message": {
+                      "type": "string",
+                      "example": "Contact created successfully!"
                     },
-                    "totalItems": {
-                      "type": "integer",
-                      "description": "Total number of contacts available."
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/Contact"
                     }
                   }
                 }
@@ -878,27 +922,6 @@
                 "message": {
                   "type": "string",
                   "example": "Bad Request"
-                },
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "errors": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "field": {
-                            "type": "string",
-                            "example": "name"
-                          },
-                          "message": {
-                            "type": "string",
-                            "example": "Name is required."
-                          }
-                        }
-                      }
-                    }
-                  }
                 }
               }
             }
@@ -937,8 +960,7 @@
               "type": "object",
               "required": [
                 "status",
-                "message",
-                "data"
+                "message"
               ],
               "properties": {
                 "status": {
@@ -948,10 +970,6 @@
                 "message": {
                   "type": "string",
                   "example": "Resource not found"
-                },
-                "data": {
-                  "type": "object",
-                  "additionalProperties": false
                 }
               }
             }

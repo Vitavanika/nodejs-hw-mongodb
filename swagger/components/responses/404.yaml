@@ -6,7 +6,6 @@ content:
       required:
         - status
         - message
-        - data
       properties:
         status:
           type: integer
@@ -14,6 +13,3 @@ content:
         message:
           type: string
           example: Resource not found
-        data:
-          type: object
-          additionalProperties: false
